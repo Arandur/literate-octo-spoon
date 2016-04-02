@@ -52,29 +52,11 @@ def get_next_datum_vals (rows, i):
 
     return None, len (rows)
 
-def name_splitter (pattern) :
-    def split_name (name) :
-        try :
-            return re.match (pattern, name).groupdict ()
-        except AttributeError :
-            from sys import stderr
-            print >> stderr, "Format error in sample label:", name
-            print >> stderr, "Data will be used without any label"
-
-            return {}
-
-    return split_name
-
 def generate_output_vals (data) :
-    name_labels = [ "ColID", "ColType", "Week", "Vial" ]
-    pattern = re.compile ( \
-            r"(?P<ColID>\w+)\s+(?P<ColType>\w+)\s+(?P<Week>\w+\s+\d+)\s+V(?P<Vial>\d)")
-    split_name = name_splitter (pattern)
-
-    output_vals = [dict (vals.items () + split_name (name).items ()) \
+    output_vals = [dict (vals.items () + [("Sample", name)]) \
                    for name, vals in data]
     output_labels = \
-            name_labels + \
+            ["Sample"] + \
             sorted(reduce(set.union, (set (vals.keys ()) for _, vals in data)))
 
     return output_labels, output_vals
