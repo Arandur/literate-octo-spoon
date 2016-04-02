@@ -91,10 +91,10 @@ if __name__ == "__main__" :
         in_path = sys.argv[1]
         out_path = sys.argv[2]
 
-    with open (in_path, "r") as f:
+    with open (in_path, "rb") as f:
         data = get_data (list (csv.reader (f)))
 
-    with open (out_path, "w") as f:
+    with open (out_path, "wb") as f:
         out_labels, out_vals = generate_output_vals (data)
         writer = csv.DictWriter (f, fieldnames = out_labels)
         writer.writeheader ()
