@@ -15,48 +15,56 @@ def get_data (rows) :
 
     return data
 
+def datum_keys_getter (key_labels) :
+    def get_next_datum_keys (rows, i) :
+        for row in rows[i:]:
+            if all (k in row for k in key_labels) :
+                cols = [row.index (k) for k in key_labels]
+                return [rows[i + 1][col] for col in cols], i + 2
+
+        return None, len (rows)
+
+    return get_next_datum_keys
+
+def datum_vals_getter (key_val_label, val_label) :
+    def get_next_datum_vals (rows, i):
+        for j, row in enumerate (rows[i:]) :
+            if key_val_label in row and val_label in row :
+                col_k = row.index (key_val_label)
+                col_v = row.index (val_label)
+
+                vals = {}
+                
+                for m, row in enumerate (rows[i + j + 1:]) :
+                    try :
+                        k = float (row[col_k])
+                        vals[k] = row[col_v]
+                    except ValueError :
+                        return vals, i + j + 1 + m
+
+                return vals, len (rows)
+
+        return None, len (rows)
+
+    return get_next_datum_vals
+
 def get_next_datum (rows, i) :
-    datum_name, j = get_next_datum_name (rows, i)
+    get_next_datum_keys = datum_keys_getter (["Sample", "Misc"])
+    get_next_datum_vals = datum_vals_getter ("R.T.", "Area")
+
+    datum_keys, j = get_next_datum_keys (rows, i)
     datum_vals, k = get_next_datum_vals (rows, j)
 
-    if datum_name is not None and datum_vals is not None:
-        return (datum_name, datum_vals), k
-
-    return None, len (rows)
-
-def get_next_datum_name (rows, i) :
-    for row in rows[i:]:
-        if "Sample" in row:
-            col = row.index ("Sample")
-            return rows[i + 1][col], i + 2
-
-    return None, len (rows)
-
-def get_next_datum_vals (rows, i):
-    for j, row in enumerate (rows[i:]) :
-        if "R.T." in row and "Area" in row:
-            col_k = row.index ("R.T.")
-            col_v = row.index ("Area")
-
-            vals = {}
-            
-            for m, row in enumerate (rows[i + j + 1:]) :
-                try :
-                    k = float (row[col_k])
-                    v = int   (row[col_v])
-                    vals[k] = v # to avoid fp errors
-                except ValueError :
-                    return vals, i + j + 1 + m
-
-            return vals, len (rows)
+    if datum_keys is not None and datum_vals is not None:
+        return (datum_keys, datum_vals), k
 
     return None, len (rows)
 
 def generate_output_vals (data) :
-    output_vals = [dict (vals.items () + [("Sample", name)]) \
-                   for name, vals in data]
+    output_vals = [dict (vals.items () + zip (["Sample", "Misc"], keys)) \
+                   for keys, vals in data]
     output_labels = \
-            ["Sample"] + \
+            ["Sample", "Misc"] + \
             sorted(reduce(set.union, (set (vals.keys ()) for _, vals in data)))
 
     return output_labels, output_vals
@@ -64,11 +72,14 @@ def generate_output_vals (data) :
 if __name__ == "__main__" :
     import sys
 
-    if len (sys.argv) != 3:
+    if len (sys.argv) == 1:
         in_path = raw_input ("Input file path: ")
         out_path = raw_input ("Output file path [out.csv]: ")
         if out_path == "" :
             out_path = "out.csv"
+    elif len (sys.argv) == 2:
+        in_path = sys.argv[1]
+        out_path = "out.csv"
     else :
         in_path = sys.argv[1]
         out_path = sys.argv[2]
