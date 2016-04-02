@@ -102,4 +102,4 @@ if __name__ == "__main__" :
             writer.writerow (val)
 
     print "Successfully wrote to", out_path
-    print "Press ENTER to close this window"
+    raw_input ("Press ENTER to close this window")
