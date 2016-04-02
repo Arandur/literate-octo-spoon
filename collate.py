@@ -82,14 +82,19 @@ def generate_output_vals (data) :
 if __name__ == "__main__" :
     import sys
 
-    if len (sys.argv) != 2:
-        print >> sys.stderr, "Usage:", sys.argv[0], "CSV_FILE"
-        exit (1)
+    if len (sys.argv) != 3:
+        in_path = raw_input ("Input file path: ")
+        out_path = raw_input ("Output file path [out.csv]: ")
+        if out_path == "" :
+            out_path = "out.csv"
+    else :
+        in_path = sys.argv[1]
+        out_path = sys.argv[2]
 
-    with open (sys.argv[1], "r") as f:
+    with open (in_path, "r") as f:
         data = get_data (list (csv.reader (f)))
 
-    with open ("out.csv", "w") as f:
+    with open (out_path, "w") as f:
         out_labels, out_vals = generate_output_vals (data)
         writer = csv.DictWriter (f, fieldnames = out_labels)
         writer.writeheader ()
