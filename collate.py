@@ -100,3 +100,6 @@ if __name__ == "__main__" :
         writer.writeheader ()
         for val in out_vals :
             writer.writerow (val)
+
+    print "Successfully wrote to", out_path
+    print "Press ENTER to close this window"
