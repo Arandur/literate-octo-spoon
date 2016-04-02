@@ -80,7 +80,13 @@ def generate_output_vals (data) :
     return output_labels, output_vals
 
 if __name__ == "__main__" :
-    with open ("INTTAB_updated.csv", "r") as f:
+    import sys
+
+    if len (sys.argv) != 2:
+        print >> sys.stderr, "Usage:", sys.argv[0], "CSV_FILE"
+        exit (1)
+
+    with open (sys.argv[1], "r") as f:
         data = get_data (list (csv.reader (f)))
 
     with open ("out.csv", "w") as f:
